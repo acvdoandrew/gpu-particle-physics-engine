@@ -44,6 +44,7 @@ out/
 *.swo
 *~
 .DS_Store
+.cache/
 
 # Project specific
 bin/
@@ -54,3 +55,4 @@ profiling/
 # Documentation
 docs/html/
 docs/latex/
+
