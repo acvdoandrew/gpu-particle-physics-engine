@@ -7,7 +7,7 @@ int main() {
   // Window properties as constants
   const sf::Vector2u windowSize({800, 600});
   const float particleRadius = 5.f;
-  const uint32_t particleCount = 500;
+  const uint32_t maxParticles = 500;
 
   // Create main window
   sf::RenderWindow window(sf::VideoMode({windowSize.x, windowSize.y}),
@@ -15,22 +15,24 @@ int main() {
   window.setFramerateLimit(60); // Limit framerate for consistency
 
   // Vector to hold all our particles
-  std::vector<Particle> particles(particleCount);
-  for (auto &p : particles) {
-    float x = static_cast<float>(rand() % windowSize.x);
-    float y = static_cast<float>(rand() % (windowSize.y / 2));
-    p.position = {x, y};
-    p.old_position = p.position;
-    p.acceleration = {0.f, 1000.f};
-  }
+  std::vector<Particle> particles;
+  particles.reserve(maxParticles);
 
-  // Create circle shape
-  std::vector<sf::CircleShape> particleShapes(particleCount);
-  for (auto &s : particleShapes) {
-    s.setRadius(particleRadius);
-    s.setFillColor(sf::Color::White);
-    s.setOrigin({particleRadius, particleRadius});
+  // Spawning Logic variables
+  const float spawnInterval = 0.01f;
+  float spawnTimer = 0.f;
+
+  // FPS counter setup
+  sf::Font font;
+  // Load the font from the file in our directory
+  if (!font.openFromFile("font.ttf")) {
+    return -1;
   }
+  sf::Text fpsText(font);
+  fpsText.setCharacterSize(16);
+  fpsText.setFillColor(sf::Color::White);
+  fpsText.setPosition({5.f, 5.f});
+  float frameTime = 0.f;
 
   // Clock
   sf::Clock clock;
@@ -42,10 +44,25 @@ int main() {
     // restart() returns the elapsed time and resets the clock for the next
     // frame
     float dt = clock.restart().asSeconds();
+    frameTime = dt;
+    if (dt > 0.1f) {
+      dt = 0.1f;
+    }
 
     while (const std::optional event = window.pollEvent()) {
       if (event->is<sf::Event::Closed>())
         window.close();
+    }
+
+    // Time-based spawn logic
+    spawnTimer += dt;
+    if (spawnTimer > spawnInterval && particles.size() < maxParticles) {
+      spawnTimer = 0.f;
+      Particle p;
+      p.position = {windowSize.x / 2.f, 100.f};
+      p.old_position = p.position;
+      p.acceleration = {0.f, 1000.f};
+      particles.push_back(p);
     }
 
     // Loop through all particles for physics and collision
@@ -83,13 +100,23 @@ int main() {
       }
     }
 
+    // Update fps counter
+    int fps = static_cast<int>(1.f / frameTime);
+    fpsText.setString("FPS: " + std::to_string(fps));
+
     window.clear(sf::Color::Black);
 
-    // ---  Loop through all particles to draw them ---
-    for (size_t i = 0; i < particles.size(); ++i) {
-      particleShapes[i].setPosition(particles[i].position);
-      window.draw(particleShapes[i]);
+    // This is not super efficient, but simple for now
+    sf::CircleShape particleShape(particleRadius);
+    particleShape.setFillColor(sf::Color::White);
+    particleShape.setOrigin({particleRadius, particleRadius});
+    for (const auto &p : particles) {
+      particleShape.setPosition(p.position);
+      window.draw(particleShape);
     }
+
+    // --- NEW: Draw the FPS counter ---
+    window.draw(fpsText);
 
     window.display();
   }
