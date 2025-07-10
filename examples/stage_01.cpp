@@ -6,8 +6,8 @@ int main() {
 
   // Window properties as constants
   const sf::Vector2u windowSize({800, 600});
-  const float particleRadius = 10.f;
-  const int particleCount = 200;
+  const float particleRadius = 5.f;
+  const uint32_t particleCount = 500;
 
   // Create main window
   sf::RenderWindow window(sf::VideoMode({windowSize.x, windowSize.y}),
@@ -20,7 +20,7 @@ int main() {
     float x = static_cast<float>(rand() % windowSize.x);
     float y = static_cast<float>(rand() % (windowSize.y / 2));
     p.position = {x, y};
-    p.velocity = {0.f, 0.f};
+    p.old_position = p.position;
     p.acceleration = {0.f, 1000.f};
   }
 
@@ -50,23 +50,36 @@ int main() {
 
     // Loop through all particles for physics and collision
     for (auto &particle : particles) {
-      // Physics Update
-      particle.velocity += particle.acceleration * dt;
-      particle.position += particle.velocity * dt;
+      // Save current position
+      const sf::Vector2f previous_position = particle.position;
 
-      // Collision Detection and Response
+      // Perform Verlet Integration
+      particle.position = 2.f * particle.position - particle.old_position +
+                          particle.acceleration * dt * dt;
+
+      // Update old position
+      particle.old_position = previous_position;
+
+      // Collision logic remains the same
       const float damping = 0.8f;
       if (particle.position.y > windowSize.y - particleRadius) {
         particle.position.y = windowSize.y - particleRadius;
-        particle.velocity.y *= -damping;
+        // For Verlet, we need to update old_position on collision as well
+        particle.old_position.y =
+            particle.position.y +
+            (particle.position.y - particle.old_position.y) * damping;
       }
       if (particle.position.x > windowSize.x - particleRadius) {
         particle.position.x = windowSize.x - particleRadius;
-        particle.velocity.x *= -damping;
+        particle.old_position.x =
+            particle.position.x +
+            (particle.position.x - particle.old_position.x) * damping;
       }
       if (particle.position.x < particleRadius) {
         particle.position.x = particleRadius;
-        particle.velocity.x *= -damping;
+        particle.old_position.x =
+            particle.position.x +
+            (particle.position.x - particle.old_position.x) * damping;
       }
     }
 
