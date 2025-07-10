@@ -1,27 +1,36 @@
 #include "physics/Particle.hpp"
 #include <SFML/Graphics.hpp>
+#include <vector>
 
 int main() {
 
   // Window properties as constants
   const sf::Vector2u windowSize({800, 600});
   const float particleRadius = 10.f;
+  const int particleCount = 200;
 
   // Create main window
   sf::RenderWindow window(sf::VideoMode({windowSize.x, windowSize.y}),
                           "Particle Engine");
   window.setFramerateLimit(60); // Limit framerate for consistency
 
-  // Create the particle's data model
-  Particle particle;
-  particle.position = {windowSize.x / 2.f, windowSize.y / 2.f};
-  particle.velocity = {0.f, 0.f};
-  particle.acceleration = {0.f, 1000.f};
+  // Vector to hold all our particles
+  std::vector<Particle> particles(particleCount);
+  for (auto &p : particles) {
+    float x = static_cast<float>(rand() % windowSize.x);
+    float y = static_cast<float>(rand() % (windowSize.y / 2));
+    p.position = {x, y};
+    p.velocity = {0.f, 0.f};
+    p.acceleration = {0.f, 1000.f};
+  }
 
   // Create circle shape
-  sf::CircleShape particleShape(particleRadius);
-  particleShape.setFillColor(sf::Color::White);
-  particleShape.setOrigin({particleRadius, particleRadius});
+  std::vector<sf::CircleShape> particleShapes(particleCount);
+  for (auto &s : particleShapes) {
+    s.setRadius(particleRadius);
+    s.setFillColor(sf::Color::White);
+    s.setOrigin({particleRadius, particleRadius});
+  }
 
   // Clock
   sf::Clock clock;
@@ -39,36 +48,36 @@ int main() {
         window.close();
     }
 
-    // Euler integration formula
-    particle.velocity += particle.acceleration * dt;
-    particle.position += particle.velocity * dt;
+    // Loop through all particles for physics and collision
+    for (auto &particle : particles) {
+      // Physics Update
+      particle.velocity += particle.acceleration * dt;
+      particle.position += particle.velocity * dt;
 
-    // Collision Detection and Response
-    const float damping = 0.8f;
-
-    // Floor Collision
-    if (particle.position.y > windowSize.y - particleRadius) {
-      particle.position.y = windowSize.y - particleRadius;
-      particle.velocity.y *= -damping;
+      // Collision Detection and Response
+      const float damping = 0.8f;
+      if (particle.position.y > windowSize.y - particleRadius) {
+        particle.position.y = windowSize.y - particleRadius;
+        particle.velocity.y *= -damping;
+      }
+      if (particle.position.x > windowSize.x - particleRadius) {
+        particle.position.x = windowSize.x - particleRadius;
+        particle.velocity.x *= -damping;
+      }
+      if (particle.position.x < particleRadius) {
+        particle.position.x = particleRadius;
+        particle.velocity.x *= -damping;
+      }
     }
-
-    // Right wall Collision
-    if (particle.position.x > windowSize.x - particleRadius) {
-      particle.position.x = windowSize.x - particleRadius;
-      particle.velocity.x *= -damping;
-    }
-
-    // Left wall Collision
-    if (particle.position.x < particleRadius) {
-      particle.position.x = particleRadius;
-      particle.velocity.x *= -damping;
-    }
-
-    // Now we update the particle position using the particle's physics state
-    particleShape.setPosition(particle.position);
 
     window.clear(sf::Color::Black);
-    window.draw(particleShape);
+
+    // ---  Loop through all particles to draw them ---
+    for (size_t i = 0; i < particles.size(); ++i) {
+      particleShapes[i].setPosition(particles[i].position);
+      window.draw(particleShapes[i]);
+    }
+
     window.display();
   }
 
