@@ -80,7 +80,7 @@ int main() {
     }
 
     // Collision Loop
-    const int num_sub_steps = 2;
+    const int num_sub_steps = 4;
     for (int k = 0; k < num_sub_steps; ++k) {
 
       // Boundary constrains
