@@ -74,20 +74,20 @@ graph TD;
         A[main.cpp]
     end
 
-    subgraph Core Library
+    subgraph "Core Library"
         B(Solver)
         C(Particle)
-        D(SpatialHash [Planned])
+        D("SpatialHash (Planned)")
     end
 
     subgraph External
         E[SFML]
     end
 
-    A -- Uses --> B;
-    A -- Renders with --> E;
-    B -- Contains --> C;
-    B -- Will Use --> D;
+    A -- "Uses" --> B;
+    A -- "Renders with" --> E;
+    B -- "Contains" --> C;
+    B -- "Will Use" --> D;
 ```
 
 ---
