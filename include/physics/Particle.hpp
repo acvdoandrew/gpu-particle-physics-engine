@@ -1,4 +1,6 @@
-#pragma once
+#ifndef PARTICLE_H
+#define PARTICLE_H
+
 #include <SFML/System/Vector2.hpp>
 
 struct Particle {
@@ -6,3 +8,5 @@ struct Particle {
   sf::Vector2f old_position;
   sf::Vector2f acceleration;
 };
+
+#endif // !PARTICLE_H
