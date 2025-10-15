@@ -8,19 +8,22 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Find SFML
 find_package(SFML 3 REQUIRED COMPONENTS Graphics)
 
+# Find all my cpp files
+file(GLOB_RECURSE CORE_SOURCES src/*.cpp)
+
 # --- The Core Library ---
 # We define our core library as an INTERFACE library because it's header-only for now.
-add_library(particle_physics_core INTERFACE)
+add_library(particle_physics_core ${CORE_SOURCES})
 
 # Tell CMake that our library's public include directory is the "include" folder.
 target_include_directories(particle_physics_core
-  INTERFACE
+  PUBLIC
     ${PROJECT_SOURCE_DIR}/include
 )
 
 # We also specify that our library depends on SFML.
 target_link_libraries(particle_physics_core
-  INTERFACE
+  PUBLIC
     SFML::Graphics
 )
 
