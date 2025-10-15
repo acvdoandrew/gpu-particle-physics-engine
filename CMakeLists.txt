@@ -34,5 +34,8 @@ add_executable(cpu_demo examples/cpu_demo.cpp)
 # By doing this, it automatically gets the include directories and SFML dependency.
 target_link_libraries(cpu_demo PRIVATE particle_physics_core)
 
+add_executable(spatial_hash_test examples/spatial_hash_test.cpp)
+target_link_libraries(spatial_hash_test PRIVATE particle_physics_core)
+
 # Set output directories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
