@@ -13,7 +13,7 @@ int main() {
   // Create main window
   sf::RenderWindow window(sf::VideoMode({windowSize.x, windowSize.y}),
                           "Particle Engine");
-  window.setFramerateLimit(144); // Limit framerate for consistency
+  window.setFramerateLimit(60); // Limit framerate for consistency
 
   Solver solver;
 
