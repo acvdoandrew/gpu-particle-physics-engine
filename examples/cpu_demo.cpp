@@ -23,7 +23,7 @@ int main() {
   // FPS counter setup
   sf::Font font;
   // Load the font from the file in our directory
-  if (!font.openFromFile("font.ttf")) {
+  if (!font.openFromFile("assets/font.ttf")) {
     return -1;
   }
   sf::Text fpsText(font);
@@ -72,7 +72,7 @@ int main() {
     }
 
     // Loop through all particles for physics and collision
-    for (auto &p : particles) {
+    for (auto& p : particles) {
       // Apply Gravity (Verlet Integration)
       const sf::Vector2f previous_position = p.position;
       p.position = 2.f * p.position - p.old_position + p.acceleration * dt * dt;
@@ -84,7 +84,7 @@ int main() {
     for (int k = 0; k < num_sub_steps; ++k) {
 
       // Boundary constrains
-      for (auto &particle : particles) {
+      for (auto& particle : particles) {
         const float damping = 0.8f;
         if (particle.position.y > windowSize.y - particleRadius) {
           particle.position.y = windowSize.y - particleRadius;
@@ -108,9 +108,9 @@ int main() {
 
       // Particle - Particle Collision
       for (size_t i = 0; i < particles.size(); ++i) {
-        auto &p1 = particles[i];
+        auto& p1 = particles[i];
         for (size_t j = i + 1; j < particles.size(); ++j) {
-          auto &p2 = particles[j];
+          auto& p2 = particles[j];
           const sf::Vector2f v = p1.position - p2.position;
           const float dist2 = v.x * v.x + v.y * v.y;
           const float min_dist = 2.f * particleRadius;
@@ -146,7 +146,7 @@ int main() {
     sf::CircleShape particleShape(particleRadius);
     particleShape.setFillColor(sf::Color::White);
     particleShape.setOrigin({particleRadius, particleRadius});
-    for (const auto &p : particles) {
+    for (const auto& p : particles) {
       particleShape.setPosition(p.position);
       window.draw(particleShape);
     }
