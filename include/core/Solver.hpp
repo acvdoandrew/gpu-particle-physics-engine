@@ -1,6 +1,7 @@
 #ifndef SOLVER_H
 #define SOLVER_H
 
+#include "core/SpatialHash.hpp"
 #include "physics/Particle.hpp"
 #include <SFML/System/Vector2.hpp>
 #include <cstdint>
@@ -13,6 +14,7 @@ private:
   void solveCollision();
 
   std::vector<Particle> m_particles;
+  SpatialHash m_grid;
   sf::Vector2f m_gravity = {0.f, 1000.f};
   sf::Vector2u m_windowSize = {800, 600};
   const float m_particleRadius = 5.f;

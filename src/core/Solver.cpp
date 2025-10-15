@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <vector>
 
-Solver::Solver() { m_particles.reserve(2000); }
+Solver::Solver() : m_grid(2.f * m_particleRadius) { m_particles.reserve(2000); }
 
 const std::vector<Particle>& Solver::getParticles() const {
   return m_particles;
@@ -26,7 +26,14 @@ void Solver::update(float dt) {
   const float sub_dt = dt / static_cast<float>(m_sub_steps);
 
   for (uint32_t i = m_sub_steps; i > 0; --i) {
+
     updatePositions(sub_dt);
+
+    m_grid.clear();
+    for (auto& p : m_particles) {
+      m_grid.insert(&p);
+    }
+
     solveCollision();
     applyBoundaryConstraints();
   }
@@ -65,25 +72,32 @@ void Solver::applyBoundaryConstraints() {
 }
 
 void Solver::solveCollision() {
-  for (size_t i = 0; i < m_particles.size(); ++i) {
-    auto& p1 = m_particles[i];
-    for (size_t j = i + 1; j < m_particles.size(); ++j) {
-      auto& p2 = m_particles[j];
+  // Loop through all particles
+  for (auto& p1 : m_particles) {
+
+    // Use the spatial Hash to find neighbors
+    std::vector<Particle*> neighbors = m_grid.query(&p1);
+
+    // Loop through only the nearby neighbors
+    for (Particle* p2_ptr : neighbors) {
+      auto& p2 = *p2_ptr; // dereference the pointer
+
+      // Prevent checking a particle against itself
+      if (&p1 == &p2)
+        continue;
+
       const sf::Vector2f v = p1.position - p2.position;
       const float dist2 = v.x * v.x + v.y * v.y;
       const float min_dist = 2.f * m_particleRadius;
 
-      // Check for overlap
       if (dist2 < min_dist * min_dist) {
         const float dist = std::sqrt(dist2);
-
         if (dist > 0.0001f) {
           const sf::Vector2f collision_axis = v / dist;
           const float overlap = 0.5f * (min_dist - dist);
 
-          // Move particles apart
-          p1.position += collision_axis * overlap;
-          p2.position -= collision_axis * overlap;
+          p1.position += collision_axis * overlap * 0.5f;
+          p2.position -= collision_axis * overlap * 0.5f;
         }
       }
     }
