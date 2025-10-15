@@ -25,11 +25,11 @@ target_link_libraries(particle_physics_core
 )
 
 # --- Examples ---
-add_executable(stage_01 examples/stage_01.cpp)
+add_executable(cpu_demo examples/cpu_demo.cpp)
 
 # Now, we link our executable to our core library.
 # By doing this, it automatically gets the include directories and SFML dependency.
-target_link_libraries(stage_01 PRIVATE particle_physics_core)
+target_link_libraries(cpu_demo PRIVATE particle_physics_core)
 
 # Set output directories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
