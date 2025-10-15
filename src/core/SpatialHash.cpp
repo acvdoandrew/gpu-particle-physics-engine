@@ -34,28 +34,27 @@ void SpatialHash::insert(Particle* particle) {
   m_grid[key].push_back(particle);
 }
 
-std::vector<Particle*> SpatialHash::query(Particle* particle) {
-  // The list of potential neighbors we will return
-  std::vector<Particle*> neighbors;
+void SpatialHash::query(Particle* particle,
+                        std::vector<Particle*>& neighbors_out) {
 
+  // Clear the vector that was passed in
+  neighbors_out.clear();
   // Get the grid cell coordinates of the particle-
   const int32_t cell_x =
       static_cast<int32_t>(particle->position.x / m_cellSize);
   const int32_t cell_y =
       static_cast<int32_t>(particle->position.y / m_cellSize);
 
-  // Loop through the 3x3 neighborhood of cells
   for (int32_t dx = -1; dx <= 1; ++dx) {
     for (int32_t dy = -1; dy <= 1; ++dy) {
       const int32_t neighbor_key =
           (cell_x + dx) * PRIME_1 + (cell_y + dy) * PRIME_2;
-
-      // Check if a cell with this key exists in our grid.
       auto it = m_grid.find(neighbor_key);
       if (it != m_grid.end()) {
-        neighbors.insert(neighbors.end(), it->second.begin(), it->second.end());
+        // Insert the contents of the grid cell's vector into our output vector
+        neighbors_out.insert(neighbors_out.end(), it->second.begin(),
+                             it->second.end());
       }
     }
   }
-  return neighbors;
 }

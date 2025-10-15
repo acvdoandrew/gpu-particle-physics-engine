@@ -16,7 +16,7 @@ public:
 
   void insert(Particle* particle);
 
-  std::vector<Particle*> query(Particle* particle);
+  void query(Particle* particle, std::vector<Particle*>& neighbors_out);
 
   void clear();
 };

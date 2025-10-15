@@ -15,7 +15,7 @@ int main() {
 
   // Window properties as constants
   const sf::Vector2u windowSize({800, 600});
-  const uint32_t maxParticles = 8000; // Let's test with a high number
+  const uint32_t maxParticles = 5000; // Let's test with a high number
 
   // Create main window
   sf::RenderWindow window(sf::VideoMode({windowSize.x, windowSize.y}),

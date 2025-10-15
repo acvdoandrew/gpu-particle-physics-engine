@@ -72,32 +72,37 @@ void Solver::applyBoundaryConstraints() {
 }
 
 void Solver::solveCollision() {
-  // Loop through all particles
+  // We create one vector ONCE outside the Loop
+  std::vector<Particle*> neighbors;
+
+  neighbors.reserve(100);
+  // Loop through every particle once
   for (auto& p1 : m_particles) {
 
-    // Use the spatial Hash to find neighbors
-    std::vector<Particle*> neighbors = m_grid.query(&p1);
+    m_grid.query(&p1, neighbors);
 
-    // Loop through only the nearby neighbors
+    // Check against only the neighbors
     for (Particle* p2_ptr : neighbors) {
-      auto& p2 = *p2_ptr; // dereference the pointer
+      auto& p2 = *p2_ptr;
 
-      // Prevent checking a particle against itself
-      if (&p1 == &p2)
-        continue;
+      // This is the trick to process each pair only once.
+      // We use the memory address of the particles as a unique ID.
+      // We only solve the collision if p1's address is less than p2's.
+      // This guarantees that the pair (p1, p2) is solved, but (p2, p1) is
+      // skipped.
+      if (&p1 < &p2) {
+        const sf::Vector2f v = p1.position - p2.position;
+        const float dist2 = v.x * v.x + v.y * v.y;
+        const float min_dist = 2.f * m_particleRadius;
 
-      const sf::Vector2f v = p1.position - p2.position;
-      const float dist2 = v.x * v.x + v.y * v.y;
-      const float min_dist = 2.f * m_particleRadius;
-
-      if (dist2 < min_dist * min_dist) {
-        const float dist = std::sqrt(dist2);
-        if (dist > 0.0001f) {
-          const sf::Vector2f collision_axis = v / dist;
-          const float overlap = 0.5f * (min_dist - dist);
-
-          p1.position += collision_axis * overlap * 0.5f;
-          p2.position -= collision_axis * overlap * 0.5f;
+        if (dist2 < min_dist * min_dist) {
+          const float dist = std::sqrt(dist2);
+          if (dist > 0.0001f) {
+            const sf::Vector2f collision_axis = v / dist;
+            const float overlap = 0.5f * (min_dist - dist);
+            p1.position += collision_axis * overlap;
+            p2.position -= collision_axis * overlap;
+          }
         }
       }
     }
