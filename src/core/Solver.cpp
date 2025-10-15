@@ -84,10 +84,6 @@ void Solver::solveCollision() {
           // Move particles apart
           p1.position += collision_axis * overlap;
           p2.position -= collision_axis * overlap;
-
-          // update old position
-          p1.old_position = p1.position;
-          p2.old_position = p2.position;
         }
       }
     }

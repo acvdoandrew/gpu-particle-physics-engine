@@ -74,6 +74,7 @@ int main() {
     }
 
     window.draw(fpsText);
+    window.draw(particleCountText);
     window.draw(particleShape);
     window.display();
   }
