@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <vector>
 
-Solver::Solver() : m_grid(2.f * m_particleRadius) { m_particles.reserve(2000); }
+Solver::Solver() : m_grid(10.0f) { m_particles.reserve(10000); }
 
 const std::vector<Particle>& Solver::getParticles() const {
   return m_particles;
@@ -30,6 +30,12 @@ void Solver::update(float dt) {
   for (uint32_t i = m_sub_steps; i > 0; --i) {
 
     updatePositions(sub_dt);
+
+    m_grid.clear();
+    for (auto& p : m_particles) {
+      m_grid.insert(&p);
+    }
+
     solveCollision();
     applyBoundaryConstraints();
   }
@@ -68,22 +74,15 @@ void Solver::applyBoundaryConstraints() {
 }
 
 void Solver::solveCollision() {
-  // Create ONE vector, ONCE, outside the loop.
-  std::vector<Particle*> neighbors;
-  neighbors.reserve(100);
-
   for (auto& p1 : m_particles) {
-    // Pass the vector to be filled. No new memory is allocated.
+    std::vector<Particle*> neighbors;
     m_grid.query(&p1, neighbors);
 
     for (Particle* p2_ptr : neighbors) {
       auto& p2 = *p2_ptr;
 
-      // This trick ensures we process each pair only once.
       if (&p1 < &p2) {
-        // Increment our diagnostic counter
         m_collisionChecks++;
-
         const sf::Vector2f v = p1.position - p2.position;
         const float dist2 = v.x * v.x + v.y * v.y;
         const float min_dist = 2.f * m_particleRadius;
