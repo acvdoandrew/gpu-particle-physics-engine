@@ -39,6 +39,12 @@ int main() {
   particleCountText.setFillColor(sf::Color::White);
   particleCountText.setPosition({5.f, 25.f});
 
+  sf::Text collisionText(font);
+  collisionText.setFont(font);
+  collisionText.setCharacterSize(16);
+  collisionText.setFillColor(sf::Color::White);
+  collisionText.setPosition({5.f, 45.f});
+
   sf::Clock clock;
   while (window.isOpen()) {
     float dt = clock.restart().asSeconds();
@@ -69,6 +75,8 @@ int main() {
     fpsText.setString("FPS: " + std::to_string(fps));
     particleCountText.setString("Particles: " +
                                 std::to_string(solver.getParticles().size()));
+    collisionText.setString("Checks: " +
+                            std::to_string(solver.getCollisionChecks()));
 
     // Render Step
     window.clear(sf::Color::Black);
@@ -87,6 +95,7 @@ int main() {
 
     window.draw(fpsText);
     window.draw(particleCountText);
+    window.draw(collisionText);
     window.display();
   }
   return 0;

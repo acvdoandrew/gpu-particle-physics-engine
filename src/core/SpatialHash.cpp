@@ -1,4 +1,5 @@
 #include "core/SpatialHash.hpp"
+#include <cmath>
 #include <cstdint>
 #include <vector>
 
@@ -13,14 +14,17 @@ SpatialHash::SpatialHash(float cell_size)
 void SpatialHash::clear() { m_grid.clear(); }
 
 int32_t SpatialHash::getHashKey(const sf::Vector2f& position) const {
-  // Core SpatialHash
-  // Divide the position by the cell size to get the integer grid coordinates.
-  const int32_t cell_x = static_cast<int32_t>(position.x / m_cellSize);
-  const int32_t cell_y = static_cast<int32_t>(position.y / m_cellSize);
+  // Use std::floor to correctly handle negative positions.
+  // e.g., -50.f / 100.f becomes -0.5f, which floors to -1, the correct cell.
+  const int32_t cell_x =
+      static_cast<int32_t>(std::floor(position.x / m_cellSize));
+  const int32_t cell_y =
+      static_cast<int32_t>(std::floor(position.y / m_cellSize));
 
-  // Combine the 2D grid coordinates into a single 1D hash key
-  // Using large prime numbers helps to distribute the keys more evenly.
-  return cell_x * PRIME_1 + cell_y * PRIME_2;
+  // A more robust hashing function that avoids collisions with negative
+  // coordinates. The bitwise XOR (^) is better at combining hash values than
+  // simple addition.
+  return (cell_x * 73856093) ^ (cell_y * 19349663);
 }
 
 void SpatialHash::insert(Particle* particle) {

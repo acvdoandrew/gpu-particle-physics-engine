@@ -23,17 +23,13 @@ void Solver::update(float dt) {
     dt = 0.05f;
   }
 
+  m_collisionChecks = 0;
+
   const float sub_dt = dt / static_cast<float>(m_sub_steps);
 
   for (uint32_t i = m_sub_steps; i > 0; --i) {
 
     updatePositions(sub_dt);
-
-    m_grid.clear();
-    for (auto& p : m_particles) {
-      m_grid.insert(&p);
-    }
-
     solveCollision();
     applyBoundaryConstraints();
   }
@@ -72,25 +68,22 @@ void Solver::applyBoundaryConstraints() {
 }
 
 void Solver::solveCollision() {
-  // We create one vector ONCE outside the Loop
+  // Create ONE vector, ONCE, outside the loop.
   std::vector<Particle*> neighbors;
-
   neighbors.reserve(100);
-  // Loop through every particle once
-  for (auto& p1 : m_particles) {
 
+  for (auto& p1 : m_particles) {
+    // Pass the vector to be filled. No new memory is allocated.
     m_grid.query(&p1, neighbors);
 
-    // Check against only the neighbors
     for (Particle* p2_ptr : neighbors) {
       auto& p2 = *p2_ptr;
 
-      // This is the trick to process each pair only once.
-      // We use the memory address of the particles as a unique ID.
-      // We only solve the collision if p1's address is less than p2's.
-      // This guarantees that the pair (p1, p2) is solved, but (p2, p1) is
-      // skipped.
+      // This trick ensures we process each pair only once.
       if (&p1 < &p2) {
+        // Increment our diagnostic counter
+        m_collisionChecks++;
+
         const sf::Vector2f v = p1.position - p2.position;
         const float dist2 = v.x * v.x + v.y * v.y;
         const float min_dist = 2.f * m_particleRadius;
