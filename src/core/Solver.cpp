@@ -4,7 +4,10 @@
 #include <cstdint>
 #include <vector>
 
-Solver::Solver() : m_grid(10.0f) { m_particles.reserve(10000); }
+Solver::Solver() : m_grid(10.0f) {
+  m_particles.reserve(10000);
+  m_neighbor_cache.reserve(100);
+}
 
 const std::vector<Particle>& Solver::getParticles() const {
   return m_particles;
@@ -76,9 +79,9 @@ void Solver::applyBoundaryConstraints() {
 void Solver::solveCollision() {
   for (auto& p1 : m_particles) {
     std::vector<Particle*> neighbors;
-    m_grid.query(&p1, neighbors);
+    m_grid.query(&p1, m_neighbor_cache);
 
-    for (Particle* p2_ptr : neighbors) {
+    for (Particle* p2_ptr : m_neighbor_cache) {
       auto& p2 = *p2_ptr;
 
       if (&p1 < &p2) {
